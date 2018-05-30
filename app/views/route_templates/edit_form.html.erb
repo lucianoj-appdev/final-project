@@ -1,0 +1,33 @@
+<!-- Validation failure messages -->
+<% if @route.errors.any? %>
+  <% @route.errors.full_messages.each do |message| %>
+    <div class="alert">
+      <%= message %>
+    </div>
+  <% end %>
+<% end %>
+
+<h1>
+  Edit route #<%= @route.id %>
+</h1>
+
+<hr>
+
+<form action="/update_route/<%= @route.id %>" method="post">
+  <!-- Label and input for start_id -->
+  <%= select_tag("start_id", options_from_collection_for_select(Location.all, :id, :name, @route.try(:start_id)), :class => "form-control") %>
+
+  <!-- Label and input for end_id -->
+  <%= select_tag("end_id", options_from_collection_for_select(Location.all, :id, :name, @route.try(:end_id)), :class => "form-control") %>
+  or <a href="/departments/new">Add a new location</a> first
+
+  <button class="btn btn-block btn-outline-secondary">
+    Update route
+  </button>
+</form>
+
+<hr>
+
+<a href="/routes">
+  Go back
+</a>

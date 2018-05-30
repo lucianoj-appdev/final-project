@@ -1,0 +1,44 @@
+<!-- Validation failure messages -->
+<% if @location.errors.any? %>
+  <% @location.errors.full_messages.each do |message| %>
+    <div class="alert">
+      <%= message %>
+    </div>
+  <% end %>
+<% end %>
+
+<h1>
+  Edit location #<%= @location.id %>
+</h1>
+
+<hr>
+
+<form action="/update_location/<%= @location.id %>" method="post">
+  <!-- Label and input for name -->
+  <div class="form-group">
+    <label for="name">
+      Name
+    </label>
+
+    <input type="text" id="name" name="name" class="form-control" value="<%= @location.name %>">
+  </div>
+
+  <!-- Label and input for address -->
+  <div class="form-group">
+    <label for="address">
+      Address
+    </label>
+
+    <input type="text" id="address" name="address" class="form-control" value="<%= @location.address %>">
+  </div>
+
+  <button class="btn btn-block btn-outline-secondary">
+    Update location
+  </button>
+</form>
+
+<hr>
+
+<a href="/locations">
+  Go back
+</a>

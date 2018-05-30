@@ -1,0 +1,93 @@
+<h1>
+  Route #<%= @route.id %> details
+</h1>
+
+<a href="/routes/<%= @route.id %>/edit">
+  Edit route
+</a>
+
+<hr>
+
+<dl>
+  <dt>
+    Start
+  </dt>
+  <dd>
+    <a href="/locations/<%= @route.start_id %>">
+      <%= Location.find(@route.start_id).name %>
+    </a>
+    (<%= @parsed_route_data.dig("routes", 0, "legs", 0, "start_address") %>)
+  </dd>
+
+  <dt>
+    End
+  </dt>
+  <dd>
+    <a href="/locations/<%= @route.end_id %>">
+      <%= Location.find(@route.end_id).name %>
+    </a>
+    (<%= @parsed_route_data.dig("routes", 0, "legs", 0, "end_address") %>)
+  </dd>
+  
+  <dt>
+    Duration
+  </dt>
+  <dd>
+    <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
+  </dd>
+</dl>
+
+<a href="/delete_route/<%= @route.id %>">
+  Delete route
+</a>
+
+<hr>
+
+<h2>
+  Route Forecast
+</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">
+        Start Time
+      </th>
+      <% for i in 0..@columns do %>
+        <th scope="col">
+          <%= Time.at(i*15*60).utc.strftime("%H:%M")  %>
+        </th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% for i in 0..(48-@duration/3600).to_i do %>
+      <tr>
+        <td>
+          <%= Time.at(@weather[0][i].dig("time")).in_time_zone(@parsed_weather_data.dig('timezone')).strftime("%I:%M%p") %>
+        </td>
+        <% for j in 0..@columns do %>
+            <% if @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.75 %>
+              <td class="table-danger">
+              </td>
+            <% elsif @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.5 %>
+              <td class="table-warning">
+              </td>
+            <% elsif @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.25 %>
+              <td class="table-primary">
+              </td>
+            <% else %>
+              <td>
+              </td>
+            <% end %>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<hr>
+
+<a href="/routes">
+  Go back
+</a>

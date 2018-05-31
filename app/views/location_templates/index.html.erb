@@ -1,42 +1,37 @@
-<h1>
-  All locations
-</h1>
-
-<a href="/locations/new">
-  Add a new location
-</a>
+<div class="card">
+  <div class="card-header">
+    My Locations
+  </div>
+  <ul class="list-group list-group-flush">
+    <% @locations.each do |location| %>
+      <a href="/locations/<%= location.id %>" class="list-group-item list-group-item-action">
+        <%= location.name %> (<%= location.address %>)
+      </a>
+    <% end %>
+    <a class="btn btn-secondary" role="button" href="/locations/new">
+      Add a new location
+    </a>
+  </ul>
+</div>
 
 <hr>
 
-<table class="table">
-  <tr>
-    <th>
-      Name
-    </th>
-
-    <th>
-      Address
-    </th>
-    
-    <th>
-    </th>
-  </tr>
-
+<div class="list-group" id="accordion">
   <% @locations.each do |location| %>
-  <tr>
-    <td>
-      <%= location.name %>
-    </td>
+  <div class="card">
+    <div class="card-header" id="heading<%= location.id %>">
+      <h5 class="mb-0">
+        <button class="list-group-item list-group-item-action" data-toggle="collapse" data-target="#collapse<%= location.id %>" aria-expanded="true" aria-controls="collapse<%= location.id %>">
+          <%= location.name %> (<%= location.address %>)
+        </button>
+      </h5>
+    </div>
 
-    <td>
-      <%= location.address %>
-    </td>
-
-    <td>
-      <a href="/locations/<%= location.id %>">
-        Show details
-      </a>
-    </td>
-  </tr>
+    <div id="collapse<%= location.id %>" class="collapse hide" aria-labelledby="heading<%= location.id %>" data-parent="#accordion">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
   <% end %>
-</table>
+</div>

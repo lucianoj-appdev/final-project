@@ -1,63 +1,67 @@
 <h1>
-  Route #<%= @route.id %> details
+  Route #<%= @route.id %> Forecast
+  <a class="btn btn-primary" role="button" href="/routes/<%= @route.id %>/edit">
+    Edit
+  </a>
+  
+  <a class="btn btn-danger" role="button" href="/delete_route/<%= @route.id %>">
+    Delete
+  </a>
 </h1>
 
-<a href="/routes/<%= @route.id %>/edit">
-  Edit route
-</a>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col" class="text-left">
+        Start
+      </th>
+      <th scope="col" class="text-center">
+        Duration
+      </th>
+      <th scope="col" class="text-right">
+        End
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="text-left">
+        <a href="/locations/<%= @route.start_id %>">
+          <%= Location.find(@route.start_id).name %>
+        </a>
+        <br> 
+        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "start_address") %>
+      </td>
+      <td class="text-center">
+        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
+      </td>
+      <td class="text-right">
+        <a href="/locations/<%= @route.end_id %>">
+          <%= Location.find(@route.end_id).name %>
+        </a>
+        <br>
+        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "end_address") %>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 <hr>
-
-<dl>
-  <dt>
-    Start
-  </dt>
-  <dd>
-    <a href="/locations/<%= @route.start_id %>">
-      <%= Location.find(@route.start_id).name %>
-    </a>
-    (<%= @parsed_route_data.dig("routes", 0, "legs", 0, "start_address") %>)
-  </dd>
-
-  <dt>
-    End
-  </dt>
-  <dd>
-    <a href="/locations/<%= @route.end_id %>">
-      <%= Location.find(@route.end_id).name %>
-    </a>
-    (<%= @parsed_route_data.dig("routes", 0, "legs", 0, "end_address") %>)
-  </dd>
-  
-  <dt>
-    Duration
-  </dt>
-  <dd>
-    <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
-  </dd>
-</dl>
-
-<a href="/delete_route/<%= @route.id %>">
-  Delete route
-</a>
-
-<hr>
-
-<h2>
-  Route Forecast
-</h2>
 
 <table class="table">
   <thead>
     <tr>
       <th scope="col">
-        Start Time
+        <%= Location.find(@route.start_id).name %>
       </th>
       <% for i in 0..@columns do %>
-        <th scope="col">
+        <th scope="col" class="text-center">
           <%= Time.at(i*15*60).utc.strftime("%H:%M")  %>
         </th>
       <% end %>
+      <th scope="col" class="text-right">
+        <%= Location.find(@route.end_id).name %>
+      </th>
     </tr>
   </thead>
   <tbody>
@@ -65,7 +69,7 @@
       <tr>
         <td>
           <%= Time.at(@weather[0][i].dig("time")).in_time_zone(@parsed_weather_data.dig('timezone')).strftime("%I:%M%p") %>
-        </td>
+        </td class="text-center">
         <% for j in 0..@columns do %>
             <% if @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.75 %>
               <td class="table-danger">
@@ -80,7 +84,10 @@
               <td>
               </td>
             <% end %>
-        <% end %>
+          <% end %>
+        <td class="text-right">
+          <%= Time.at(@weather[0][i].dig("time")+@duration).in_time_zone(@parsed_weather_data.dig('timezone')).strftime("%I:%M%p") %>
+        </td>
       </tr>
     <% end %>
   </tbody>

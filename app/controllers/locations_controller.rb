@@ -1,6 +1,6 @@
 class LocationsController < ApplicationController
   def index
-    @locations = Location.all
+    @locations = Location.where(user_id: current_user.id).all
 
     render("location_templates/index.html.erb")
   end
@@ -12,8 +12,10 @@ class LocationsController < ApplicationController
     @url = String.new("https://maps.googleapis.com/maps/api/geocode/json?address=").concat(address)
     parsed_data = JSON.parse(open(@url).read)
     
-    @location.address = parsed_data.dig("results", 0, "formatted_address")
-    @location.save
+    if parsed_data.dig("results", 0, "formatted_address").nil? == FALSE
+      @location.address = parsed_data.dig("results", 0, "formatted_address")
+      @location.save
+    end
     
     @latitude = parsed_data.dig("results", 0, "geometry", "location", "lat")
     @longitude = parsed_data.dig("results", 0, "geometry", "location", "lng")
@@ -30,6 +32,7 @@ class LocationsController < ApplicationController
 
     @location.name = params.fetch("name")
     @location.address = params.fetch("address")
+    @location.user_id = current_user.id
 
     if @location.valid?
       @location.save

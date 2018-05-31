@@ -1,6 +1,6 @@
 class RoutesController < ApplicationController
   def index
-    @routes = Route.all
+    @routes = Route.where(user_id: current_user.id).all
 
     render("route_templates/index.html.erb")
   end
@@ -56,6 +56,7 @@ class RoutesController < ApplicationController
 
     @route.start_id = params.fetch("start_id")
     @route.end_id = params.fetch("end_id")
+    @route.user_id = current_user.id
 
     if @route.valid?
       @route.save

@@ -19,6 +19,9 @@ Rails.application.routes.draw do
 
   # DELETE
   get("/delete_route/:id_to_remove", { :controller => "routes", :action => "destroy_row" })
+  
+  # FLIP
+  get("/flip/:id_to_flip", { :controller => "routes", :action => "flip" })
 
   #------------------------------
 

@@ -1,15 +1,25 @@
 <div class="card">
-  <div class="card-header">
-    My Routes
+  <div class="card-header pr-0 pl-0 text-center">
+    <div class="container">
+      <div class="row">
+        <div class="col text-left">
+        </div>
+        <div class="col align-middle text-center">
+          My Routes
+        </div>
+        <div class="col text-right">
+          <a class="btn btn-secondary" role="button" href="/routes/new">
+            <i class="fas fa-plus"></i>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
   <ul class="list-group list-group-flush">
     <% @routes.each do |route| %>
       <a href="/routes/<%= route.id %>" class="list-group-item list-group-item-action">
-        <%= Location.find(route.start_id).name %> -> <%= Location.find(route.end_id).name %>
+        <%= Location.find(route.start_id).name %> <i class="fas fa-arrow-circle-right"></i> <%= Location.find(route.end_id).name %>
       </a>
     <% end %>
-    <a class="btn btn-secondary" role="button" href="/routes/new">
-      Add a new route
-    </a>
   </ul>
 </div>

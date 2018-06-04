@@ -12,4 +12,5 @@
 
 class Route < ApplicationRecord
     has_many :locations
+    serialize :weather, JSON
 end

@@ -1,100 +1,223 @@
-<h1>
-  Route #<%= @route.id %> Forecast
-  <a class="btn btn-primary" role="button" href="/routes/<%= @route.id %>/edit">
-    Edit
-  </a>
-  
-  <a class="btn btn-danger" role="button" href="/delete_route/<%= @route.id %>">
-    Delete
-  </a>
-</h1>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col" class="text-left">
-        Start
-      </th>
-      <th scope="col" class="text-center">
-        Duration
-      </th>
-      <th scope="col" class="text-right">
-        End
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="text-left">
-        <a href="/locations/<%= @route.start_id %>">
-          <%= Location.find(@route.start_id).name %>
-        </a>
-        <br> 
-        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "start_address") %>
-      </td>
-      <td class="text-center">
-        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
-      </td>
-      <td class="text-right">
-        <a href="/locations/<%= @route.end_id %>">
-          <%= Location.find(@route.end_id).name %>
-        </a>
-        <br>
-        <%= @parsed_route_data.dig("routes", 0, "legs", 0, "end_address") %>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<hr>
-
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">
-        <%= Location.find(@route.start_id).name %>
-      </th>
-      <% for i in 0..@columns do %>
-        <th scope="col" class="text-center">
-          <%= Time.at(i*15*60).utc.strftime("%H:%M")  %>
-        </th>
-      <% end %>
-      <th scope="col" class="text-right">
-        <%= Location.find(@route.end_id).name %>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <% for i in 0..(48-@duration/3600).to_i do %>
+<div class="card">
+  <div class="card-header pr-0 pl-0 text-center">
+    <div class="container">
+      <div class="row">
+        <div class="col text-left">
+          <a class="btn btn-danger" role="button" href="/delete_route/<%= @route.id %>">
+            <i class="fas fa-times"></i>
+          </a>
+        </div>
+        <div class="col text-center align-middle">
+          Route Details
+        </div>
+        <div class="col text-right">
+          <a class="btn btn-primary" role="button" href="/routes/<%= @route.id %>/edit">
+            <i class="fas fa-edit"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="table lg-auto">
+    <thead>
       <tr>
-        <td>
-          <%= Time.at(@weather[0][i].dig("time")).in_time_zone(@parsed_weather_data.dig('timezone')).strftime("%I:%M%p") %>
-        </td class="text-center">
-        <% for j in 0..@columns do %>
-            <% if @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.75 %>
-              <td class="table-danger">
+        <th scope="col-8" class="text-left">
+          Start
+        </th>
+        <th scope="col" class="text-center">
+          Duration
+        </th>
+        <th scope="col-8" class="text-right">
+          End
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="text-left">
+          <a href="/locations/<%= @route.start_id %>">
+            <%= Location.find(@route.start_id).name %>
+          </a>
+          <br> 
+          <%= Location.find(@route.start_id).address %>
+        </td>
+        <td class="text-center">
+          <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
+          <form action="/flip/<%= @route.id %>">
+            <input type="hidden" name="id_to_flip" value="<%= @route.id %>">
+              <button class="btn btn-block btn-secondary">
+                <i class="fas fa-arrows-alt-h"></i>
+              </button>
+          </form>
+        </td>
+        <td class="text-right">
+          <a href="/locations/<%= @route.end_id %>">
+            <%= Location.find(@route.end_id).name %>
+          </a>
+          <br>
+          <%= Location.find(@route.end_id).address %>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<br>
+
+<div class="card">
+  <div class="card-header text-center">
+    Route Forecast
+  </div>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">
+          Start Time
+        </th>
+        <% (0..@columns).each do |i| %>
+          <th scope="col" class="text-center">
+            <%= Time.at(i*@interval*60).utc.strftime("%H:%M")  %>
+          </th>
+        <% end %>
+        <th scope="col" class="text-right">
+          Arrival Time
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (0..(@weather[0].length - 1 - @duration/3600).to_i).each do |i| %>
+        <tr>
+          <td>
+            <%= Time.at(@weather[0][i].dig("time")).in_time_zone(@parsed_weather_data.dig("timezone")).strftime("%I:%M%p") %>
+          </td class="text-center">
+          <% (0..@columns).each do |j| %>
+            <% precipProbability = @weather[j][(i+j/(60/@interval.to_f)).to_i].dig("precipProbability")*100 %>
+            <% precipIntensity = @weather[j][(i+j/(60/@interval.to_f)).to_i].dig("precipIntensity") %>
+            <% dBZ = Math.log(precipIntensity**(8/5)*200)*10 %>
+            <% if @weather[j][(i+j/(60/@interval.to_f)).to_i].dig("precipType").nil? == TRUE %>
+              <% precipType = "precipication" %>
+            <% else %>
+              <% precipType = @weather[j][(i+j/(60/@interval.to_f)).to_i].dig("precipType") %>
+            <% end %>
+            
+            <% if dBZ > 75 %>
+              <td style="background-color:<%= @colors.dig(precipType)[14] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
               </td>
-            <% elsif @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.5 %>
-              <td class="table-warning">
+            <% elsif dBZ > 70 %>
+              <td style="background-color:<%= @colors.dig(precipType)[13] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
               </td>
-            <% elsif @weather[j][(i+j/4).to_i].dig("precipProbability") > 0.25 %>
-              <td class="table-primary">
+            <% elsif dBZ > 65 %>
+              <td style="background-color:<%= @colors.dig(precipType)[12] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 60 %>
+              <td style="background-color:<%= @colors.dig(precipType)[11] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 55 %>
+              <td style="background-color:<%= @colors.dig(precipType)[10] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 50 %>
+              <td style="background-color:<%= @colors.dig(precipType)[9] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 45 %>
+              <td style="background-color:<%= @colors.dig(precipType)[8] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 40 %>
+              <td style="background-color:<%= @colors.dig(precipType)[7] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 35 %>
+              <td style="background-color:<%= @colors.dig(precipType)[6] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 30 %>
+              <td style="background-color:<%= @colors.dig(precipType)[5] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 25 %>
+              <td style="background-color:<%= @colors.dig(precipType)[4] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 20 %>
+              <td style="background-color:<%= @colors.dig(precipType)[3] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 15 %>
+              <td style="background-color:<%= @colors.dig(precipType)[2] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 10 %>
+              <td style="background-color:<%= @colors.dig(precipType)[1] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
+              </td>
+            <% elsif dBZ > 5 %>
+              <td style="background-color:<%= @colors.dig(precipType)[0] %>;" data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
               </td>
             <% else %>
-              <td>
+              <td data-toggle="tooltip" data-placement="top" title="Chance of <%= precipType %>: <%= number_to_percentage(precipProbability, precision: 0) %>">
               </td>
             <% end %>
           <% end %>
         <td class="text-right">
-          <%= Time.at(@weather[0][i].dig("time")+@duration).in_time_zone(@parsed_weather_data.dig('timezone')).strftime("%I:%M%p") %>
+          <%= Time.at(@weather[0][i].dig("time")+@duration).in_time_zone(@parsed_weather_data.dig("timezone")).strftime("%I:%M%p") %>
         </td>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 
-<hr>
+<br>
 
-<a href="/routes">
-  Go back
-</a>
+<div class="card">
+  <div class="card-header text-center">
+    Legend
+  </div>
+  <table class="table">
+    <thead class="text-center">
+      <tr>
+        <th>
+        </th>
+        <th colspan="6">
+          Light
+        </th>
+        <th colspan="6">
+          Medium
+        </th>
+        <th colspan="3">
+          Severe
+        </th>
+      </tr>
+    </thead>
+    <tr>
+      <td>
+        Rain
+      </td>
+      <% @colors.dig("rain").each do |color| %>
+      <td style="background-color:<%= color %>;">
+        
+      </td>
+      <% end %>
+    </tr>
+    <tr>
+      <td>
+        Snow
+      </td>
+      <% @colors.dig("snow").each do |color| %>
+      <td style="background-color:<%= color %>;">
+        
+      </td>
+      <% end %>
+    </tr>
+    <tr>
+      <td>
+        Ice
+      </td>
+      <% @colors.dig("sleet").each do |color| %>
+      <td style="background-color:<%= color %>;">
+        
+      </td>
+      <% end %>
+    </tr>
+  </table>
+</div>

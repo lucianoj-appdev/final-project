@@ -49,13 +49,21 @@ class RoutesController < ApplicationController
     
     @weather = Array.new
 
-    (0..(@polyline.length-1)).step(poly_interval).each do |i|
-      lat = @polyline[i][0]
-      lon = @polyline[i][1]
-      weather_url = String.new("https://api.darksky.net/forecast/8cb01bc87b1278fd8200bbf1edfbffb3/").concat(lat.to_s).concat(",").concat(lon.to_s)
-      @parsed_weather_data = JSON.parse(open(weather_url).read)
-      weather = @parsed_weather_data.dig("hourly", "data")
-      @weather.concat([weather])
+    begin
+      (0..(@polyline.length-1)).step(poly_interval).each do |i|
+        lat = @polyline[i][0]
+        lon = @polyline[i][1]
+        weather_url = String.new("https://api.darksky.net/forecast/8cb01bc87b1278fd8200bbf1edfbffb3/").concat(lat.to_s).concat(",").concat(lon.to_s)
+        
+        
+          @parsed_weather_data = JSON.parse(open(weather_url).read)
+          weather = @parsed_weather_data.dig("hourly", "data")
+          @weather.concat([weather])
+      end
+    rescue OpenURI::HTTPError
+        puts "HELLO"
+        redirect_to("/routes", :notice => "This site has exceeded it's daily limit of DarkSky API calls. Please check back tomorrow.")
+        return
     end
     
     # Define weather colors

@@ -126,18 +126,24 @@ class RoutesController < ApplicationController
   end
 
   def create_row
-    @route = Route.new
-
-    @route.start_id = params.fetch("start_id")
-    @route.end_id = params.fetch("end_id")
-    @route.user_id = current_user.id
-
-    if @route.valid?
-      @route.save
-
-      redirect_to("/routes/#{@route.id}", :notice => "Route created successfully.")
+    
+    if params.fetch("start_id") == params.fetch("end_id")
+      redirect_to("/routes/new", :alert => "Start and End locations cannot be the same.")
+      return
     else
-      render("route_templates/new_form.html.erb")
+      @route = Route.new
+  
+      @route.start_id = params.fetch("start_id")
+      @route.end_id = 
+      @route.user_id = current_user.id
+  
+      if @route.valid?
+        @route.save
+  
+        redirect_to("/routes/#{@route.id}", :notice => "Route created successfully.")
+      else
+        render("route_templates/new_form.html.erb")
+      end
     end
   end
 

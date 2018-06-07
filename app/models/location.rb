@@ -11,4 +11,6 @@
 #
 
 class Location < ApplicationRecord
+    validates :name, uniqueness: { scope: :user_id,
+    message: "is already taken. Please choose another" }
 end

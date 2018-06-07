@@ -37,7 +37,7 @@ class LocationsController < ApplicationController
     if @location.valid?
       @location.save
 
-      redirect_to("/locations", :notice => "Location created successfully.")
+      redirect_to("/locations/#{@location.id}", :notice => "Location created successfully.")
     else
       render("location_templates/new_form.html.erb")
     end

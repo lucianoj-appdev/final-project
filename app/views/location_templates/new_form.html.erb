@@ -9,38 +9,26 @@
   <% end %>
 <% end %>
 
-<h1>
-  Add a new location
-</h1>
-
-<hr>
-
-<form action="/create_location" method="post">
-  <!-- Label and input for name -->
-  <div class="form-group">
-    <label for="name">
-      Name
-    </label>
-
-    <input type="text" id="name" name="name" class="form-control" value="<%= @location.try(:name) %>">
+<div class="card">
+  <div class="card-header text-center">
+        Create Location
   </div>
-
-  <!-- Label and input for address -->
-  <div class="form-group">
-    <label for="address">
-      Address
-    </label>
-
-    <input type="text" id="address" name="address" class="form-control" value="<%= @location.try(:address) %>">
+  <div class="card-body">
+    <form action="/create_location" method="post">
+      <!-- Label and input for name -->
+      <div class="form-row">
+        <div class="col">
+        <input type="text" id="name" name="name" placeholder="Name" class="form-control" value="<%= @location.try(:name) %>">
+        </div>
+        <div class="col">
+          <input type="text" id="address" name="address" placeholder="Address" class="form-control" value="<%= @location.try(:address) %>">
+        </div>
+        <div class="col">
+          <button class="btn btn-block btn-primary">
+            Create location
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
-
-  <button class="btn btn-block btn-outline-secondary">
-    Create location
-  </button>
-</form>
-
-<hr>
-
-<a href="/locations">
-  Go back
-</a>
+</div>

@@ -15,7 +15,7 @@
             <i class="fas fa-times"></i>
           </a>
         </div>
-        <div class="col text-center align-middle">
+        <div class="col text-center">
           Route Details
         </div>
         <div class="col text-right">
@@ -53,7 +53,7 @@
           <%= @parsed_route_data.dig("routes", 0, "legs", 0, "duration", "text") %>
           <form action="/flip/<%= @route.id %>">
             <input type="hidden" name="id_to_flip" value="<%= @route.id %>">
-              <button class="btn btn-block btn-secondary">
+              <button class="btn btn-secondary">
                 <i class="fas fa-arrows-alt-h"></i>
               </button>
           </form>

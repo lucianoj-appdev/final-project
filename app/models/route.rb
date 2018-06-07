@@ -12,5 +12,10 @@
 
 class Route < ApplicationRecord
     has_many :locations
-    serialize :weather, JSON
+    validates :start_id, uniqueness: { scope: :end_id,
+    message: "Routes should have a different start and end location." }
+    validates :end_id, uniqueness: { scope: :start_id,
+    message: "Routes should have a different start and end location." }
+    # validates :end_id, exclusion: { in: :start_id,
+    # message: "Routes should have a different start and end location." }
 end
